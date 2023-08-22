@@ -1,0 +1,105 @@
+A.) CREATE TABLE STUDENT (
+    StdID int PRIMARY KEY,
+    StdName varchar(30),
+    Gender varchar(6),
+    Percentage int,
+    SClass int,
+    Sec varchar(30),
+    Stream varchar(30),
+    DOB varchar(50)
+);
+
+B)
+INSERT INTO STUDENT
+VALUES (7,'GAURAV GARG','MALE',60,11,'A','Science','3/05/2005');
+
+TASK:2
+
+1) SELECT * FROM STUDENT;
+2) SELECT Stdname,DOB FROM STUDENT;
+3) SELECT * FROM STUDENT WHERE Percentage >80;
+4) SELECT Stdname,Stream,Percentage FROM STUDENT WHERE Percentage >80;
+5) SELECT * FROM STUDENT WHERE Stream ='Science'AND Percentage >75;
+
+TASK:3
+
+1) DESCRIBE STUDENT;
+2) ALTER TABLE STUDENT ADD TeacherID varchar(20); 
+3) DESCRIBE STUDENT;
+4) SELECT * FROM STUDENT;
+5) ALTER TABLE STUDENT MODIFY COLUMN TeacherID INT;
+
+TASK:4 
+
+1) ALTER TABLE STUDENT DROP COLUMN TeacherID;
+2) UPDATE STUDENT SET Percentage=Percentage-5;
+SELECT Stdname,Percentage FROM STUDENT; 
+3) SELECT Stdname AS 'Student Name',DOB AS 'Date of Birth' FROM STUDENT;
+4) SELECT StdName FROM STUDENT WHERE Stream NOT IN ('Science');
+5) SELECT Stdname,Percentage FROM STUDENT WHERE Percentage BETWEEN 60 AND 80;
+
+TASK:5
+
+1)  UPDATE STUDENT SET StdName='SWATI VERMA', Percentage=86 WHERE StdID=1004;
+2) DELETE FROM STUDENT WHERE StdId = 1006; 
+3) SELECT * FROM Student WHERE StdName LIKE 'G_' ;
+Empty set (0.03 sec)
+
+mysql> SELECT * FROM Student WHERE StdName LIKE 'G_';
+Empty set (0.00 sec)
+
+mysql> SELECT * FROM Student WHERE StdName LIKE 'G';
+Empty set (0.00 sec)
+
+mysql> SELECT * FROM Student WHERE StdName LIKE '%G';
++-------+-------------+--------+------------+--------+------+---------+-----------+
+| StdID | StdName     | Gender | Percentage | SClass | Sec  | Stream  | DOB       |
++-------+-------------+--------+------------+--------+------+---------+-----------+
+|     7 | GAURAV GARG | MALE   |         60 |     11 | A    | Science | 3/05/2005 |
++-------+-------------+--------+------------+--------+------+---------+-----------+
+1 row in set (0.00 sec)
+
+mysql> SELECT * FROM Student WHERE StdName LIKE '%G%';
++-------+-------------+--------+------------+--------+------+---------+-----------+
+| StdID | StdName     | Gender | Percentage | SClass | Sec  | Stream  | DOB       |
++-------+-------------+--------+------------+--------+------+---------+-----------+
+|     7 | GAURAV GARG | MALE   |         60 |     11 | A    | Science | 3/05/2005 |
++-------+-------------+--------+------------+--------+------+---------+-----------+
+1 row in set (0.00 sec)
+
+4) SELECT DISTINCT Stream FROM STUDENT;
+
+5)  SELECT StdName, Gender, Stream FROM Student WHERE percentage BETWEEN 70 AND 80;
++--------------+--------+----------+
+| StdName      | Gender | Stream   |
++--------------+--------+----------+
+| Ankush Kumar | MALE   | Commerce |
+| Jaya Kumari  | FEMALE | Science  |
++--------------+--------+----------+
+2 rows in set (0.00 sec)
+
+TASK:6
+
+1) CREATE TABLE Empl(
+    empno int PRIMARY KEY,
+    ename varchar(30),
+    job varchar(30),
+    mgr varchar(30),
+    hiredate varchar(50),
+    sal int,
+    comm int,
+    deptno int
+);
+
+a)SELECT ename, sal FROM Empl WHERE sal >= 2200;
+b)SELECT * FROM Empl WHERE comm IS NULL;
+c)SELECT ename, sal FROM Empl WHERE sal < 2500 OR sal > 4000;
+d)SELECT ename, job, sal FROM Empl WHERE mgr IS NULL;
+e)SELECT ename FROM Empl WHERE ename LIKE '__A%';
+f)SELECT ename FROM Empl WHERE ename LIKE '%T';
+g)SELECT ename FROM Empl WHERE ename LIKE 'M_L%';
+h)SELECT * FROM Empl WHERE comm IS NULL AND sal = 'Not given';
+
+
+
+
