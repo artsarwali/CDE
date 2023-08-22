@@ -1,0 +1,251 @@
+TASK 1:
+
+a. Find the names of aircraft such that all pilots certified to operate them earn more than $80,000:
+
+
+SELECT A.aname
+FROM Aircraft A
+WHERE NOT EXISTS (
+    SELECT E.eid
+    FROM Employees E
+    WHERE E.salary <= 80000
+    AND NOT EXISTS (
+        SELECT C.eid
+        FROM Certified C
+        WHERE C.aid = A.aid
+        AND C.eid = E.eid
+    )
+);
+b. For each pilot who is certified for more than three aircraft, find the eid and the maximum cruisingrange of the aircraft for which she or he is certified:
+
+
+SELECT C.eid, MAX(A.cruisingrange) AS max_cruisingrange
+FROM Certified C
+JOIN Aircraft A ON C.aid = A.aid
+GROUP BY C.eid
+HAVING COUNT(*) > 3;
+
+c. Find the names of pilots whose salary is less than the price of the cheapest route from Los Angeles to Honolulu:
+
+SELECT E.ename
+FROM Employees E
+WHERE E.salary < (
+    SELECT MIN(R.price)
+    FROM Flights R
+    WHERE R.from = 'Los Angeles' AND R.to = 'Honolulu'
+);
+
+d. For all aircraft with cruisingrange over 1000 miles, find the name of the aircraft and the average salary of all pilots certified for this aircraft:
+
+SELECT A.aname, AVG(E.salary) AS avg_salary
+FROM Aircraft A
+JOIN Certified C ON A.aid = C.aid
+JOIN Employees E ON C.eid = E.eid
+WHERE A.cruisingrange > 1000
+GROUP BY A.aname;
+
+e. Find the names of pilots certified for some Boeing aircraft:
+
+SELECT DISTINCT E.ename
+FROM Employees E
+JOIN Certified C ON E.eid = C.eid
+JOIN Aircraft A ON C.aid = A.aid
+WHERE A.aname LIKE 'Boeing%';
+
+f. Find the aids of all aircraft that can be used on routes from Los Angeles to Chicago:
+
+SELECT DISTINCT A.aid
+FROM Aircraft A
+JOIN Certified C ON A.aid = C.aid
+JOIN Flights F ON F.to = 'Chicago' AND F.from = 'Los Angeles'
+WHERE EXISTS (
+    SELECT C2.eid
+    FROM Certified C2
+    WHERE C2.aid = A.aid
+);
+
+g. Identify the routes that can be piloted by every pilot who makes more than $100,000:
+
+
+SELECT F.from, F.to
+FROM Flights F
+WHERE NOT EXISTS (
+    SELECT E.eid
+    FROM Employees E
+    WHERE E.salary > 100000
+    AND NOT EXISTS (
+        SELECT C.eid
+        FROM Certified C
+        WHERE C.aid = F.aid
+        AND C.eid = E.eid
+    )
+);
+h. Print the enames of pilots who can operate planes with cruising range greater than 3000 miles but are not certified on any Boeing aircraft:
+
+SELECT DISTINCT E.ename
+FROM Employees E
+JOIN Certified C ON E.eid = C.eid
+JOIN Aircraft A ON C.aid = A.aid
+WHERE A.cruisingrange > 3000
+AND E.eid NOT IN (
+    SELECT C2.eid
+    FROM Certified C2
+    JOIN Aircraft A2 ON C2.aid = A2.aid
+    WHERE A2.aname LIKE 'Boeing%'
+);
+
+i. A customer wants to travel from Madison to New York with no more than two changes of flight. List the choice of departure times from Madison if the customer wants to arrive in New York by 6 p.m.:
+
+
+j. Compute the difference between the average salary of a pilot and the average salary of all employees (including pilots):
+
+SELECT AVG(CASE WHEN E.salary > 0 THEN E.salary ELSE 0 END) AS pilot_avg_salary,
+       AVG(E.salary) AS all_avg_salary
+FROM Employees E;
+
+k. Print the name and salary of every nonpilot whose salary is more than the average salary for pilots:
+
+SELECT E.ename, E.salary
+FROM Employees E
+WHERE E.salary > (
+    SELECT AVG(CASE WHEN E2.salary > 0 THEN E2.salary ELSE 0 END)
+    FROM Employees E2
+    WHERE E2.salary > 0
+);
+
+l. Print the names of employees who are certified only on aircraft with cruising range longer than 1000 miles:
+
+SELECT DISTINCT E.ename
+FROM Employees E
+WHERE NOT EXISTS (
+    SELECT C.eid
+    FROM Certified C
+    JOIN Aircraft A ON C.aid = A.aid
+    WHERE A.cruisingrange <= 1000
+    AND C.eid = E.eid
+);
+m. Print the names of employees who are certified only on aircraft with cruising range longer than 1000 miles and who are certified on at least two such aircraft:
+
+
+SELECT E.ename
+FROM Employees E
+WHERE NOT EXISTS (
+    SELECT C.eid
+    FROM Certified C
+    JOIN Aircraft A ON C.aid = A.aid
+    WHERE A.cruisingrange <= 1000
+    AND C.eid = E.eid
+)
+AND (
+    SELECT COUNT(DISTINCT A.aid)
+    FROM Certified C
+    JOIN Aircraft A ON C.aid = A.aid
+    WHERE A.cruisingrange > 1000
+    AND C.eid = E.eid
+) >= 2;
+n. Print the names of employees who are certified only on aircraft with cruising range longer than 1000 miles and who are certified on some Boeing aircraft:
+
+
+SELECT E.ename
+FROM Employees E
+WHERE NOT EXISTS (
+    SELECT C.eid
+    FROM Certified C
+    JOIN Aircraft A ON C.aid = A.aid
+    WHERE A.cruisingrange <= 1000
+    AND C.eid = E.eid
+)
+AND EXISTS (
+    SELECT C.eid
+    FROM Certified C
+    JOIN Aircraft A ON C.aid = A.aid
+    WHERE A.aname LIKE 'Boeing%'
+    AND C.eid = E.eid
+);
+
+
+TASK 2:
+
+a. Print the names and ages of each employee who works in both the Hardware department and the Software department:
+
+
+SELECT E.ename, E.age
+FROM Emp E
+WHERE EXISTS (
+    SELECT 1
+    FROM Works W1
+    JOIN Dept D1 ON W1.did = D1.did
+    WHERE W1.eid = E.eid AND D1.dname = 'Hardware'
+)
+AND EXISTS (
+    SELECT 1
+    FROM Works W2
+    JOIN Dept D2 ON W2.did = D2.did
+    WHERE W2.eid = E.eid AND D2.dname = 'Software'
+);
+
+b. For each department with more than 20 full-time-equivalent employees, print the did together with the number of employees that work in that department:
+
+SELECT W.did, COUNT(E.eid) AS num_employees
+FROM Works W
+JOIN Emp E ON W.eid = E.eid
+WHERE W.pct_time = 100 
+GROUP BY W.did
+HAVING COUNT(E.eid) > 20;
+
+c. Print the name of each employee whose salary exceeds the budget of all the departments that he or she works in:
+
+SELECT E.ename
+FROM Emp E
+WHERE E.salary > ALL (
+    SELECT D.budget
+    FROM Works W
+    JOIN Dept D ON W.did = D.did
+    WHERE W.eid = E.eid
+);
+
+d. Find the managerids of managers who manage only departments with budgets greater than $1 million:
+
+SELECT D.managerid
+FROM Dept D
+GROUP BY D.managerid
+HAVING COUNT(*) = COUNT(CASE WHEN D.budget > 1000000 THEN 1 ELSE NULL END);
+
+e. Find the enames of managers who manage the departments with the largest budgets:
+
+WITH MaxBudget AS (
+    SELECT MAX(budget) AS max_budget
+    FROM Dept
+)
+SELECT E.ename
+FROM Emp E
+JOIN Dept D ON E.eid = D.managerid
+WHERE D.budget = (SELECT max_budget FROM MaxBudget);
+
+f. Find the managerids of managers who control more than $5 million:
+
+SELECT D.managerid
+FROM Dept D
+GROUP BY D.managerid
+HAVING SUM(D.budget) > 5000000;
+
+g. Find the managerids of managers who control the largest amounts:
+
+SELECT managerid
+FROM Dept
+GROUP BY managerid
+ORDER BY SUM(budget) DESC
+LIMIT 1;
+
+
+h. Find the enames of managers who manage only departments with budgets larger than $1 million, but at least one department with a budget less than $5 million:
+
+SELECT E.ename
+FROM Emp E
+WHERE E.eid IN (
+    SELECT D.managerid
+    FROM Dept D
+    GROUP BY D.managerid
+    HAVING MIN(D.budget) < 5000000
+    AND MAX(D.budget) > 1000000
+);
